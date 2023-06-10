@@ -1,0 +1,75 @@
+syntax = "proto3";
+
+// 服务定义
+service ExcavatorCmd {
+  rpc meta_cmd (MetaAction) returns (Response) {};
+  rpc mission_cmd (MissionAction) returns (Response) {}
+  rpc info_query (InfoQuery) returns (Response) {}
+}
+
+// 元指令
+message MetaAction {
+  int32 actor_id = 1;  // 目标挖掘机id
+  string timestamp = 2;
+  int32 movement = 3;  // 可正可负，单位由具体运动type决定
+  enum ActionType {
+    STOP = 0;  // 停止，应有最高优先级
+    FORWARD = 1;  // 底盘前进
+    BACKWARD = 2;  // 底盘后推
+    LEFT = 3;  // 底盘左旋转
+    RIGHT = 4;  // 底盘右旋转
+    FORWARD_LEFT = 5; // 组合 - 底盘左前
+    FORWARD_RIGHT = 6; // 组合 - 底盘右前
+    BACKWARD_LEFT = 7; // 组合 - 底盘左后
+    BACKWARD_RIGHT = 8; // 组合 - 底盘右后
+    ARM_LEFT = 9;  // 挖臂左旋转
+    ARM_RIGHT = 10;  // 挖臂右旋转
+    BUCKET_ROT = 11;  // 铲斗，movement是角度，往前俯为正。
+    ARM_1_ROT = 12;  // 大臂，movement是角度，往前俯为正。
+    ARM_2_ROT = 13; // 小臂，movement是角度，往前俯为正。
+    COCKPIT_LEFT = 14;  //驾驶舱左转，即左回转
+    COCKPIT_RIGHT = 15;  //驾驶舱右转，即右回转
+    TT_UP = 16; // 推土上抬
+    TT_DOWN = 17;  // 推土下方
+    HAMMER = 18;  // 冲击锤
+  }
+  ActionType type = 4;
+}
+
+// 任务指令
+message MissionAction {
+  int32 actor_id = 1;
+  string timestamp = 2;
+  int32 target = 3;  // 指派目标
+  enum ActionType {  // 待设计
+    RESET = 0; // 返回初始状态
+    PUSH = 1; // 往前推土
+    EXCAVATE = 2; // 挖土
+    NAV_READY = 3; // 开启导航模式（保留）
+    NAV_START = 4; // 开始执行导航 (已从别处获得导航目标)
+    NAV_STOP = 5;  //停止导航
+    AUTO_WORKING_START = 6;  // 自动挖掘开始，需要指定target（目前代表卸料点）
+    AUTO_WORKING_END = 7;  // 自动挖掘结束
+  }
+  ActionType type = 4;
+}
+
+
+// 信息查询
+message InfoQuery {
+  int32 actor_id = 1;  // 目标挖掘机id
+  string timestamp = 2;
+  enum InfoType {
+    JOINTANGLE = 0;  // 关节角度，[底座-大臂， 大臂-小臂， 小臂-铲斗]
+  }
+  InfoType type = 4;
+}
+
+
+// 返回消息定义
+message Response {
+  int32 status = 1;
+  int32 actor_id = 2;
+  string timestamp = 3;
+  string message = 4;
+}
